@@ -1,0 +1,12 @@
+# Private working notes — not for the public repo
+draft.md
+INTENT.md
+skills-lock.json
+
+# Local machine settings
+.claude/settings.local.json
+
+# Scratch
+*.tmp
+*.log
+node_modules/
