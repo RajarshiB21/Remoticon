@@ -11,11 +11,14 @@ Some skills I use on the daily to make my life just a bit simpler:
 
 ## Credits
 
-Two of these skills are not mine, and both are worth the credit.
+Two of the skills here are not mine, and both earned their place.
 
 - **writing-for-agents** by Matt Pocock. MIT, © 2026. https://github.com/mattpocock/skills
 - **unslop** by Lauren Tan, from the pstack collection. MIT, © 2026. https://github.com/cursor/plugins
-- **humanizer** by blader (Siqi Chen). MIT. I run it as a plugin rather than shipping it here. https://github.com/blader/humanizer
+
+One more tool, not shipped in this repo but used to write it:
+
+- **humanizer** by blader (Siqi Chen). MIT. I run it as a plugin rather than copying it in. https://github.com/blader/humanizer
 
 Both vendored skills are MIT, so their `LICENSE` files ride along in their folders.
 
