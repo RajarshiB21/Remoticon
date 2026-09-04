@@ -2,7 +2,7 @@
 
 pi is my coding harness, not the product. The product is my package that extends it: `pi-remoticon`. Its source lives at `D:\Workspace\01_Active\pi-remoticon` - that is the git repo you branch and edit. pi itself stays installed from npm and is never edited.
 
-00_Mainframe is the workspace, not part of the product. Discussion, planning and notes live here; product code never does. It is a public repo named Remoticon; draft.md and INTENT.md stay out of it.
+00_Mainframe is the workspace, not part of the product. Discussion, planning and notes live here; product code never does. It is a public repo named Remoticon; private working notes stay out of it.
 
 ## COMMUNICATION
 
