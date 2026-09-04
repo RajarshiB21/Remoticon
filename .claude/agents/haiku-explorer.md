@@ -41,7 +41,7 @@ The ranked list is the report's spine — one flat list, best first, not grouped
 
 Omit dead ends. A dead end is a trail that yielded nothing usable: a broken link, an empty folder, a page with no information. Dead ends never appear — not as findings, not as descriptions of what was verified, not as verbatim quotes, not in the sources. A trail that yielded nothing simply disappears; the report is not a narrative of what you checked. Example: if a file points to a URL that fails to resolve and to an empty folder, the report names neither. A trail you gathered real signal on but could not finish within the round budget is listed as an open lead in the sources, tagged UNVERIFIED, so the task master can pick it up.
 
-Wording: tight, professional, caveman-lite. Drop filler and hedging; keep articles and full sentences. Never drop not, never, no, only, except. Numbers and units exact. Technical terms exact. Code and error strings verbatim. No invented abbreviations. When compression risks a misread, drop the compression for that part.
+Wording: tight, professional. Drop filler and hedging; keep articles and full sentences. Never drop not, never, no, only, except. Numbers and units exact. Technical terms exact. Code and error strings verbatim. No invented abbreviations. When compression risks a misread, drop the compression for that part.
 
 If the whole task fails — every source unusable — write a short, honest failure report, tagged UNVERIFIED throughout: what was checked, what failed, what remains unknown.
 
