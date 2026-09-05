@@ -20,7 +20,7 @@ One more, installed rather than copied in, is **ponytail**, Dietrich Gebert's mi
 And two subagents, both mine:
 
 - **haiku-explorer.** A dedicated explorer that runs on Haiku. The main agent hands it a trail of files, folders, or web links, and it follows that trail wherever it leads, then reports back with exact, citable sources. It never talks to me. It reports to the agent that spawned it, and the report is built to be cross-checked without a second look.
-- **reviewer.** A dedicated code reviewer that runs on Opus. The main agent points it at the current branch, and it reviews the diff by running both thermo-nuclear skills, then hands back one report ranked by severity. It reviews and reports, nothing more. It never edits, commits, or fixes. The findings are advice, and any fix that follows goes through systematic-debugging.
+- **reviewer.** Runs on Opus. The main agent points it at the current branch, and it reviews the branch by running both thermo-nuclear skills, returning each skill's report in that skill's own form: its own severity terms, prioritisation, and verdict. It lays no template, ranking, or verdict of its own over the top of them, and it never edits, commits, or fixes. The findings are advice, and any fix that follows goes through systematic-debugging.
 
 ## How haiku-explorer works
 
@@ -41,20 +41,19 @@ flowchart TD
 
 ## How the reviewer works
 
-The main agent points it at the current branch and waits. It takes the diff against main as its scope, runs the two thermo-nuclear skills over it, merges what they find into one list ranked most severe first, and hands that back. It reads the code around a change before it reports it, so a finding is confirmed, not guessed. It touches nothing. The report is advice the main agent acts on, and a fix goes through systematic-debugging, not through the reviewer. A blocker sends the work back for a fix and another pass; a clean branch is ready to open as a pull request.
+The main agent points it at the current branch and waits. It reviews the branch by running the two thermo-nuclear skills over the changes. Each skill it invokes brings its own instructions and its own way of reporting, so each report comes back in that skill's own form: its priority terms, its prioritisation order, its approval bar. The reviewer lays no format of its own over the top, does not merge the two or rank one against the other, and writes no verdict the skills did not give. Its only additions are a scope line naming the changed files and a heading over each report. The findings are advice, and a fix goes through systematic-debugging, not through the reviewer.
 
 ```mermaid
 flowchart TD
-    A[Main agent dispatches the reviewer at the current branch] --> B[Establish the diff: git diff main to HEAD]
-    B --> C[Correctness pass: thermo-nuclear-review skill]
-    B --> D[Maintainability pass: thermo-nuclear-code-quality-review skill]
-    C --> E[Merge and rank findings, most severe first]
-    D --> E
-    E --> F["Report to main agent: severity, file and line,<br/>the problem, the fix. Advice, not tasks."]
-    F --> G{Blocker found?}
-    G -->|yes| H[Fix via systematic-debugging, then re-review]
-    H --> B
-    G -->|no| I[Commit, push, open the pull request]
+    A[Main agent dispatches the reviewer at the current branch] --> B[Scope: name the files the branch changed]
+    B --> C[Run thermo-nuclear-review]
+    B --> D[Run thermo-nuclear-code-quality-review]
+    C --> E["Its report, in the skill's own form:<br/>priority terms, prioritisation, verdict"]
+    D --> F["Its report, in the skill's own form:<br/>prioritisation order, approval bar"]
+    E --> G[Main agent reads both reports, each in its own form]
+    F --> G
+    G --> H[Main agent weighs the advice; a fix goes through systematic-debugging]
+    H --> I[Commit, push, open the pull request]
     I --> J[CodeRabbit reviews the PR in the cloud]
     J --> K[You approve and merge. Never auto-merge.]
 ```
