@@ -1,6 +1,6 @@
 # Mainframe
 
-My workspace repo. It holds an `AGENTS.md`, a set of Claude Code skills, and one subagent. Some of the skills I borrowed. The rest I built, and the subagent is mine too.
+My workspace repo. It holds an `AGENTS.md`, a set of Claude Code skills, and two subagents. Some of the skills I borrowed. The rest I built, and the subagents are mine too.
 
 ## What's here
 Things I use on the daily to make my life just a bit simpler:
@@ -11,10 +11,16 @@ Things I use on the daily to make my life just a bit simpler:
 - **unslop.** From Lauren Tan's pstack collection. It strips AI tells out of prose. Copied in as-is. No more "It's not X its Y" or annoying em dashes. Sentences get said plainly.
 - **humanizer.** blader's skill (Siqi Chen). It rewrites AI-sounding prose so it reads like a person wrote it. Copied in from the official repo. I used to run it as a plugin, but pi cannot load plugins, so now it lives here as a plain skill that both harnesses read.
 - **readme-update.** Mine. It keeps a project's README in step with what actually lives in its `.claude` or `.pi` folder. It checks each borrowed skill's license at the source, credits the author, and runs the new prose through unslop then humanizer. I built it this session, and this update is its first run.
+- **tui-design.** gfargo's skill. It teaches how to design a terminal interface that reads well: layout, spacing, colour restraint, visual hierarchy, resize and error handling. Copied in as-is. pi draws its own screens with its own TUI library rather than Ink, so I take the design doctrine and leave the Ink-specific reference alone.
+- **systematic-debugging.** Jesse Vincent's skill, from his superpowers collection. It makes you find the root cause before you touch a fix, and it names band-aids and test-editing for what they are. This is my guard against the monkey-patching that sank my last attempt. Copied in with its reference files.
+- **thermo-nuclear-review** and **thermo-nuclear-code-quality-review.** Cursor's pair. The first audits a branch's diff for bugs, breaking changes, security holes and feature-gate leaks. The second is a harsh maintainability review that hunts over-engineering and spaghetti. My reviewer subagent runs both. Copied in, with model invocation switched on so the reviewer can call them.
 
-And one subagent, mine:
+One more, installed rather than copied in, is **ponytail**, Dietrich Gebert's minimalism ruleset that keeps an agent reaching for the shortest solution that works. Its whole point is to stay active for a full session, and that needs the plugin and extension hooks a plain skill does not have, so it does not live in this repo. It runs as a Claude Code plugin and as a pi extension, each installed straight from its own repo.
+
+And two subagents, both mine:
 
 - **haiku-explorer.** A dedicated explorer that runs on Haiku. The main agent hands it a trail of files, folders, or web links, and it follows that trail wherever it leads, then reports back with exact, citable sources. It never talks to me. It reports to the agent that spawned it, and the report is built to be cross-checked without a second look.
+- **reviewer.** A dedicated code reviewer that runs on Opus. The main agent points it at the current branch, and it reviews the diff by running both thermo-nuclear skills, then hands back one report ranked by severity. It reviews and reports, nothing more. It never edits, commits, or fixes. The findings are advice, and any fix that follows goes through systematic-debugging.
 
 ## How haiku-explorer works
 
@@ -33,6 +39,26 @@ flowchart TD
     E --> F[Main agent reads top-down,<br/>checks the tail against its sources]
 ```
 
+## How the reviewer works
+
+The main agent points it at the current branch and waits. It takes the diff against main as its scope, runs the two thermo-nuclear skills over it, merges what they find into one list ranked most severe first, and hands that back. It reads the code around a change before it reports it, so a finding is confirmed, not guessed. It touches nothing. The report is advice the main agent acts on, and a fix goes through systematic-debugging, not through the reviewer. A blocker sends the work back for a fix and another pass; a clean branch is ready to open as a pull request.
+
+```mermaid
+flowchart TD
+    A[Main agent dispatches the reviewer at the current branch] --> B[Establish the diff: git diff main to HEAD]
+    B --> C[Correctness pass: thermo-nuclear-review skill]
+    B --> D[Maintainability pass: thermo-nuclear-code-quality-review skill]
+    C --> E[Merge and rank findings, most severe first]
+    D --> E
+    E --> F["Report to main agent: severity, file and line,<br/>the problem, the fix. Advice, not tasks."]
+    F --> G{Blocker found?}
+    G -->|yes| H[Fix via systematic-debugging, then re-review]
+    H --> B
+    G -->|no| I[Commit, push, open the pull request]
+    I --> J[CodeRabbit reviews the PR in the cloud]
+    J --> K[You approve and merge. Never auto-merge.]
+```
+
 ## Credits
 
 The borrowed skills here are not mine, and all earned their place.
@@ -41,7 +67,12 @@ The borrowed skills here are not mine, and all earned their place.
 - **writing-for-agents** by Matt Pocock. MIT, © 2026. https://github.com/mattpocock/skills
 - **unslop** by Lauren Tan, from the pstack collection. MIT, © 2026. https://github.com/cursor/plugins
 - **humanizer** by blader (Siqi Chen). MIT, © 2025. https://github.com/blader/humanizer
+- **tui-design** by gfargo. MIT, © 2026. https://github.com/gfargo/tui-design-skill
+- **systematic-debugging** by Jesse Vincent, from the superpowers collection. MIT, © 2025. https://github.com/obra/superpowers
+- **thermo-nuclear-review** and **thermo-nuclear-code-quality-review** by Cursor. MIT, © 2026. https://github.com/cursor/plugins
 
-Every vendored skill is MIT, so a `LICENSE` file rides along in each of their folders. github-flow, the readme-update skill, and the haiku-explorer subagent are mine.
+ponytail, by Dietrich Gebert (MIT), is not in this list because it is installed rather than copied in, so its files never enter this repo. https://github.com/DietrichGebert/ponytail
+
+Every vendored skill is MIT, so a `LICENSE` file rides along in each of their folders. github-flow, the readme-update skill, and both subagents, haiku-explorer and reviewer, are mine.
 
 This README went through unslop, then humanizer, before it landed here. Fitting, given what two of these skills do.
