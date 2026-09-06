@@ -70,7 +70,7 @@ The workflow — every change runs through this, in order:
 3. Run the local checks - typecheck, lint, unit tests, integration tests. Report the actual output.
 4. When the change touches UI, HTML/CSS, or terminal output: render it and look at the actual pixels - run the TUI in a real terminal at `tuiMode: fullscreen` - before change is done. "Verified", "PASS" and "working" describe pixels you have seen, never source you have read, a validator, or a green test. When you cannot render it, say so plainly and stop there.
 5. I verify user-visible changes myself, running pi on the branch.
-6. Push the branch and open a pull request. Github Actions reruns the same checks on a clean machine; CodeRabbit comments on the diff.
+6. Push the branch and open a pull request. Github Actions reruns the same checks on a clean machine; CodeRabbit comments on the diff. **Read every CodeRabbit finding, not its summary.** Its top comment often says "no actionable comments" while inline findings sit on the diff lines; the summary is not the verdict. Pull the full inline list with `gh api repos/<owner>/<repo>/pulls/<n>/comments` (the PR "Files changed" tab, not "Conversation", in the browser), triage each against the current code (some are stale from earlier commits), fix the real ones, then reply on each thread saying how it was handled and resolve it. Do not report CodeRabbit clean until that list is empty and its check is green.
 7. I say merge. Only then does it reach main.
 8. Pull main back down afterwards, or my machine keeps serving the old version.
 
