@@ -1,82 +1,117 @@
 # Mainframe
 
-My workspace repo. It holds an `AGENTS.md`, a set of Claude Code skills, and three subagents. Some of the skills I borrowed. The rest I built, and the subagents are mine too.
+My workspace repo. It holds an `AGENTS.md`, eleven skills shared by Codex and Pi, and three Codex subagents. Some of the skills I borrowed. The rest I built, and the subagents are mine too.
+
+## Where things live
+
+`.agents/` is the single source of truth. Codex reads skills directly from `.agents/skills/`. Each skill has an `agents/openai.yaml` file for Codex metadata and invocation policy. Pi reaches the same skills through a directory junction. Codex reaches the subagents through a separate junction.
+
+```text
+.agents/
+  skills/          <- Codex reads here directly
+  agents/          <- canonical subagent TOML files
+.pi/skills         -> .agents/skills
+.codex/agents      -> .agents/agents
+```
+
+Edit the files under `.agents/`. This setup shares skills with Pi; the subagents are for Codex. Ponytail stays separately installed in each harness.
+
+The junctions are local Windows links, ignored by Git. On a fresh checkout, run these commands from the repository root to recreate them. The two link paths must be absent; inspect any existing paths before replacing them.
+
+```powershell
+New-Item -ItemType Directory -Path .pi, .codex -Force
+New-Item -ItemType Junction -Path .pi/skills -Target (Resolve-Path .agents/skills).Path
+New-Item -ItemType Junction -Path .codex/agents -Target (Resolve-Path .agents/agents).Path
+Get-Item .pi/skills, .codex/agents | Select-Object FullName, LinkType, Target
+```
 
 ## What's here
+
 Things I use on the daily to make my life just a bit simpler:
 
-- **github-flow.** Mine. It teaches git and GitHub by making you type every command that changes state while it runs the read-only checks and calls the next move. I built it with skill-creator, and writing this README was its first real test drive.
-- **grill-me** and **grilling.** Matt Pocock's pair. grill-me is the trigger and chains straight into grilling, which interviews you about a plan and maps it as a design tree, working the open questions a round at a time. Copied in as-is, then tuned. The questions now come five to a round instead of all at once, and the interview ends only when I say so, never when the model decides it has heard enough.
-- **writing-for-agents.** Matt Pocock's skill for writing documents that agents read. Copied in as-is. Exceptionally effective.
-- **unslop.** From Lauren Tan's pstack collection. It strips AI tells out of prose. Copied in as-is. No more "It's not X its Y" or annoying em dashes. Sentences get said plainly.
-- **humanizer.** blader's skill (Siqi Chen). It rewrites AI-sounding prose so it reads like a person wrote it. Copied in from the official repo. I used to run it as a plugin, but pi cannot load plugins, so now it lives here as a plain skill that both harnesses read.
-- **readme-update.** Mine. It keeps a project's README in step with what actually lives in its `.claude` or `.pi` folder. It checks each borrowed skill's license at the source, credits the author, and runs the new prose through unslop then humanizer. I built it this session, and this update is its first run.
-- **tui-design.** gfargo's skill. It teaches how to design a terminal interface that reads well: layout, spacing, colour restraint, visual hierarchy, resize and error handling. Copied in as-is. pi draws its own screens with its own TUI library rather than Ink, so I take the design doctrine and leave the Ink-specific reference alone.
-- **systematic-debugging.** Jesse Vincent's skill, from his superpowers collection. It makes you find the root cause before you touch a fix, and it names band-aids and test-editing for what they are. This is my guard against the monkey-patching that sank my last attempt. Copied in with its reference files.
-- **thermo-nuclear-review** and **thermo-nuclear-code-quality-review.** Cursor's pair. The first audits a branch's diff for bugs, breaking changes, security holes and feature-gate leaks. The second is a harsh maintainability review that hunts over-engineering and spaghetti. I run one reviewer subagent per skill, since a single agent that loads both ends up running only the first. Copied in, with model invocation switched on so a reviewer can call its skill.
+- **github-flow.** Mine. It teaches git and GitHub by making you type commands that change state while it runs the read-only checks and calls the next move. You can explicitly ask it to take over. I built it with skill-creator, and writing this README was its first real test drive.
+- **grill-me** and **grilling.** Matt Pocock's pair, tuned for my workflow. grill-me invokes grilling, which interviews you about a plan and maps its decisions as a design tree. It asks at most five questions per round, and the interview ends only when I say so.
+- **writing-for-agents.** Matt Pocock's skill for writing documents that agents read. Exceptionally effective. Its skill mechanics reference is adapted for Codex and Pi.
+- **unslop.** From Lauren Tan's pstack collection. It strips AI tells out of prose. No more annoying em dashes or stock contrast phrases. Sentences get said plainly.
+- **humanizer.** blader's skill, by Siqi Chen. It rewrites AI-sounding prose so it reads like a person wrote it. It lives here as a plain skill that both harnesses read.
+- **readme-update.** Mine. It keeps a project's README in step with its skills and agents under `.agents/`, `.codex/`, and `.pi/`. It checks borrowed skills' licenses at the source, credits the authors, and runs new prose through unslop then humanizer.
+- **tui-design.** gfargo's skill. It teaches terminal layout, spacing, colour restraint, visual hierarchy, resize and error handling. I use its design guidance for Pi's terminal interfaces.
+- **systematic-debugging.** Jesse Vincent's skill, from his superpowers collection. It makes you find the root cause before touching a fix. This is my guard against the monkey-patching that sank my last attempt. Its reference files are included; the workflow uses the checks available in the current harness.
+- **thermo-nuclear-review** and **thermo-nuclear-code-quality-review.** Cursor's pair. The first audits a branch's diff for bugs, breaking changes, security holes and feature-gate leaks. The second is a harsh maintainability review that hunts over-engineering and spaghetti. I run one reviewer subagent per skill, each with its own context.
 
-One more, installed rather than copied in, is **ponytail**, Dietrich Gebert's minimalism ruleset that keeps an agent reaching for the shortest solution that works. Its whole point is to stay active for a full session, and that needs the plugin and extension hooks a plain skill does not have, so it does not live in this repo. It runs as a Claude Code plugin and as a pi extension, each installed straight from its own repo.
+One more, installed rather than copied in, is **ponytail**, Dietrich Gebert's minimalism ruleset. It keeps an agent reaching for the shortest solution that works. It is installed separately as a Codex plugin and a Pi extension, so its files do not live in this repo.
 
 And three subagents, all mine:
 
-- **haiku-explorer.** A dedicated explorer that runs on Haiku. The main agent hands it a trail of files, folders, or web links, and it follows that trail wherever it leads, then reports back with exact, citable sources. It never talks to me. It reports to the agent that spawned it, and the report is built to be cross-checked without a second look.
-- **reviewer-general.** Runs on Opus. The main agent points it at the current branch, and it runs the thermo-nuclear-review skill over the changes, returning that skill's report in its own form: its own severity terms and phrasing. It lays no template, ranking, or verdict of its own over the top, and it never edits, commits, or fixes. The findings are advice, and any fix that follows goes through systematic-debugging.
-- **reviewer-code-quality.** Runs on Sonnet. Same shape, but it runs the thermo-nuclear-code-quality-review skill, the harsh maintainability audit, returned in that skill's own form with its prioritisation order and approval bar intact. For a full review the main agent runs both reviewers, one for bugs and security, one for maintainability.
+| Agent | Model | Reasoning effort | Job |
+|---|---|---|---|
+| scout-master | `gpt-5.6-luna` | `medium` | Investigate files and web sources; return evidence and material gaps. |
+| reviewer-general | `gpt-5.6-sol` | `high` | Run thermo-nuclear-review for bugs and security. |
+| reviewer-code-quality | `gpt-5.6-luna` | `max` | Run thermo-nuclear-code-quality-review for maintainability. |
 
-## How haiku-explorer works
+All three are configured read-only and instructed to report without changing files. Effective permissions also depend on the parent session's runtime settings. Their reports are evidence to assess, not permission to make changes.
 
-The main agent dispatches it and waits. Hand it a trail, get back a ranked report. It explores in rounds and thinks after each one, and it never ends on a silent guess. Every finding comes back with a trust tag, VERIFIED, PARTIALLY VERIFIED, or UNVERIFIED, plus a confidence score from 1 to 5 and a source the main agent can open. Findings are ranked strongest first, by confidence, then by how recent they are. The main agent reads from the top, trusts the top, and checks the tail against the sources.
+## How scout-master works
+
+The main agent assigns questions. Scout inspects relevant files and web sources, following related evidence when it can change the answer or establish its validity. Before reporting, it re-reads the supporting passages and checks the claims, citations, applicability, contradictions, and coverage.
+
+Scout distinguishes observed facts from inferences and unresolved questions. Findings include local file paths and exact line numbers or direct web links. Decision-changing claims include short supporting excerpts where useful. Date-sensitive or version-sensitive findings state which date or version applies.
+
+It finishes when the answers are supported and checked. If access, tools, or an assigned budget prevents completion, it reports what remains unknown and what would settle it. Broken links and empty folders stay in the report when they answer the question or limit the conclusion. Findings come in order of importance to the task, with evidence and limitations beside them.
 
 ```mermaid
 flowchart TD
-    A[Main agent dispatches a trail] --> B[Round 1: explore the starting point]
-    B --> T1{Thought phase}
-    T1 --> C[Round 2: fresh-angle verification pass]
-    C --> T2{Thought phase}
-    T2 -->|deep or tangled trails remain| D[Round 3: chase what's left]
-    T2 -->|trails exhausted| R[Rank findings: confidence first, then recency]
-    D --> R
-    R --> E["Report to main agent. Every finding tagged<br/>VERIFIED / PARTIALLY VERIFIED / UNVERIFIED,<br/>confidence 1 to 5, citable source"]
-    E --> F[Main agent reads top-down,<br/>checks the tail against its sources]
+    A[Main agent assigns questions] --> B[Scout inspects relevant sources]
+    B --> C[Check claims against supporting passages]
+    C --> D{Material question unresolved?}
+    D -->|Yes| E{Relevant evidence accessible within budget?}
+    E -->|Yes| B
+    E -->|No| F[Report supported findings and explicit gaps]
+    D -->|No| G[Report supported answers and evidence]
+    F --> H[Main agent checks evidence before relying on it]
+    G --> H
+    H -->|Focused follow-up needed| B
 ```
+
+Scout's essential instructions live directly in its agent file. Reading instructions does not guarantee compliance, so the main agent checks the returned evidence and asks focused follow-up questions when support is missing.
 
 ## How the reviewers work
 
-There are two reviewers, one per skill, because one agent cannot run both. When an agent invokes the first thermo-nuclear skill, that skill's instructions take over the whole context, so the agent reports and stops and the second skill never runs. Giving each skill its own agent and its own context is what fixes that.
+Each reviewer reads its assigned skill and reviews committed changes from the common ancestor of `main` and the current branch to the branch tip. Uncommitted working files are outside that comparison. The reviewer names the changed files, then returns the skill's report under its own heading, preserving its priority terms, ordering, and approval bar where defined.
 
-Each reviewer works the same way. The main agent points it at the current branch and waits. The reviewer runs its one skill over the changes, and the report comes back in that skill's own form: its priority terms, its prioritisation, its approval bar. The reviewer lays no format of its own over the top and writes no verdict the skill did not give. Its only additions are a scope line naming the changed files and a heading over the report. The findings are advice, and a fix goes through systematic-debugging, not through the reviewer. For a full review the main agent runs both, reviewer-general on Opus for bugs and security, reviewer-code-quality on Sonnet for maintainability.
+For a full review, the main agent runs both reviewers. They report advice and do not apply fixes. Fixes go through systematic-debugging and the applicable checks. I review the result before committing, separately approve publishing the branch and opening a PR, and handle the merge myself.
 
 ```mermaid
 flowchart TD
-    A[Main agent, before a PR] --> B[reviewer-general on Opus]
-    A --> C[reviewer-code-quality on Sonnet]
-    B --> B1[Scope: name the changed files]
-    C --> C1[Scope: name the changed files]
-    B1 --> B2[Run thermo-nuclear-review]
-    C1 --> C2[Run thermo-nuclear-code-quality-review]
-    B2 --> B3["Its report, in the skill's own form:<br/>priority terms, prioritisation"]
-    C2 --> C3["Its report, in the skill's own form:<br/>prioritisation order, approval bar"]
-    B3 --> G[Main agent weighs the advice; a fix goes through systematic-debugging]
-    C3 --> G
-    G --> I[Commit, push, open the pull request]
-    I --> J[CodeRabbit reviews the PR in the cloud]
-    J --> K[You approve and merge. Never auto-merge.]
+    A[Main agent requests full branch review] --> B[reviewer-general: Sol high]
+    A --> C[reviewer-code-quality: Luna max]
+    B --> D[Name changed files and run thermo-nuclear-review]
+    C --> E[Name changed files and run thermo-nuclear-code-quality-review]
+    D --> F[Return the assigned skill report]
+    E --> F
+    F --> G[Main agent assesses findings]
+    G --> H[Resolve real issues and run applicable checks]
+    H --> I[I review and approve the commit]
+    I --> J[I approve push and PR creation]
+    J --> K[Checks and CodeRabbit review the PR]
+    K --> L[Read every inline finding and resolve real issues]
+    L --> M[I merge and delete the remote branch]
+    M --> N[Pull main, delete local branch, and prune]
 ```
 
 ## Credits
 
-The borrowed skills here are not mine, and all earned their place.
+The borrowed skills here are not mine, and all earned their place. Each borrowed skill folder includes its MIT license. Some workflow instructions and harness metadata have been adapted for this setup.
 
-- **grill-me** and **grilling** by Matt Pocock. MIT, © 2026. https://github.com/mattpocock/skills
-- **writing-for-agents** by Matt Pocock. MIT, © 2026. https://github.com/mattpocock/skills
-- **unslop** by Lauren Tan, from the pstack collection. MIT, © 2026. https://github.com/cursor/plugins
-- **humanizer** by blader (Siqi Chen). MIT, © 2025. https://github.com/blader/humanizer
-- **tui-design** by gfargo. MIT, © 2026. https://github.com/gfargo/tui-design-skill
-- **systematic-debugging** by Jesse Vincent, from the superpowers collection. MIT, © 2025. https://github.com/obra/superpowers
-- **thermo-nuclear-review** and **thermo-nuclear-code-quality-review** by Cursor. MIT, © 2026. https://github.com/cursor/plugins
+- **grill-me**, **grilling**, and **writing-for-agents** by Matt Pocock. MIT, copyright 2026. [Source](https://github.com/mattpocock/skills), [license](https://github.com/mattpocock/skills/blob/main/LICENSE).
+- **unslop** by Lauren Tan, from pstack. MIT, copyright 2026. [Source](https://github.com/cursor/plugins/tree/main/pstack/skills/unslop), [license](https://github.com/cursor/plugins/blob/main/pstack/LICENSE).
+- **humanizer** by blader, Siqi Chen. MIT, copyright 2025. [Source](https://github.com/blader/humanizer), [license](https://github.com/blader/humanizer/blob/main/LICENSE).
+- **tui-design** by gfargo. MIT, copyright 2026. [Source](https://github.com/gfargo/tui-design-skill), [license](https://github.com/gfargo/tui-design-skill/blob/main/LICENSE).
+- **systematic-debugging** by Jesse Vincent, from superpowers. MIT, copyright 2025. [Source](https://github.com/obra/superpowers/tree/main/skills/systematic-debugging), [license](https://github.com/obra/superpowers/blob/main/LICENSE).
+- **thermo-nuclear-review** and **thermo-nuclear-code-quality-review** by Cursor. MIT, copyright 2026. [Source](https://github.com/cursor/plugins/tree/main/thermos/skills), [license](https://github.com/cursor/plugins/blob/main/thermos/LICENSE).
 
-ponytail, by Dietrich Gebert (MIT), is not in this list because it is installed rather than copied in, so its files never enter this repo. https://github.com/DietrichGebert/ponytail
+Ponytail is by Dietrich Gebert. Its upstream license is MIT, copyright 2026 DietrichGebert. It is installed separately. [Source](https://github.com/DietrichGebert/ponytail), [license](https://github.com/DietrichGebert/ponytail/blob/main/LICENSE).
 
-Every vendored skill is MIT, so a `LICENSE` file rides along in each of their folders. github-flow, the readme-update skill, and all three subagents, haiku-explorer, reviewer-general and reviewer-code-quality, are mine.
+github-flow, readme-update, and all three subagents are mine.
 
 This README went through unslop, then humanizer, before it landed here. Fitting, given what two of these skills do.

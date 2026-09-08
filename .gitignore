@@ -6,8 +6,9 @@ skills-lock.json
 # Local machine settings
 .claude/settings.local.json
 
-# .pi/skills is a local junction to .claude/skills (recreated per machine); never commit its resolved contents
+# Local junctions to .agents (recreated per machine); never commit resolved contents
 .pi/skills/
+.codex/agents/
 
 # Scratch
 *.tmp
