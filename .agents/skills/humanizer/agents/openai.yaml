@@ -1,0 +1,3 @@
+interface:
+  display_name: "Humanizer"
+  short_description: "Rewrite prose to sound natural and human"

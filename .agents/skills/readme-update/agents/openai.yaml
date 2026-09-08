@@ -1,0 +1,3 @@
+interface:
+  display_name: "README Update"
+  short_description: "Keep README content, credits, and licenses current"

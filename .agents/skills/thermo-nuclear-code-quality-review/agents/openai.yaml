@@ -1,0 +1,3 @@
+interface:
+  display_name: "Thermo-Nuclear Code Review"
+  short_description: "Audit code structure for maintainability risks"
