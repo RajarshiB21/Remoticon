@@ -7,6 +7,8 @@ description: Design, build, refactor, or review terminal interfaces—full-scree
 
 Design terminal software that is calm, predictable, fast, and honest about the medium. Treat this file as the workflow and cross-cutting contract. Load detailed guidance from the one reference that owns it instead of reconstructing or repeating it here.
 
+Apply guidance to the approved platform, existing framework and changed behavior. Reference examples do not add support for other platforms or require new libraries, dashboards, virtualization, configuration options or test matrices without a current need. The project contract determines acceptance; this skill does not expand the slice.
+
 ## Route before answering
 
 | Need | Authoritative reference |
@@ -19,7 +21,7 @@ Design terminal software that is calm, predictable, fast, and honest about the m
 | Layouts, buffers, borders, hierarchy, color, density, responsive behavior, tables, themes, accessibility | `references/visual-patterns.md` |
 | Keys, focus, navigation, modes, forms, mouse, confirmation, undo, OSC features | `references/interaction-patterns.md` |
 | Case studies: lazygit, k9s, fzf, btop, helix, yazi, atuin | `references/exemplar-apps.md` |
-| Screenshots or demo recordings | Use the separate `vhs-cli-demos` skill |
+| Screenshots or demo recordings | Use available native inspection tools under their current permissions; use a recording skill only if installed and needed. |
 
 Load only the references the task needs. When the prompt names a framework or ecosystem, always load its ecosystem reference before making API, lifecycle, implementation, or testing claims. Ecosystem references own those specifics. The visual and interaction references own their domains for every ecosystem. Exemplar apps are evidence and inspiration, not substitutes for the pattern references.
 

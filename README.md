@@ -29,12 +29,12 @@ Get-Item .pi/skills, .codex/agents | Select-Object FullName, LinkType, Target
 
 Things I use on the daily to make my life just a bit simpler:
 
-- **github-flow.** Mine. It teaches git and GitHub by making you type commands that change state while it runs the read-only checks and calls the next move. You can explicitly ask it to take over. I built it with skill-creator, and writing this README was its first real test drive.
+- **github-flow.** Mine. It carries out delegated Git work and teaches one command at a time when I ask to learn. I built it with skill-creator, and writing this README was its first real test drive.
 - **grill-me** and **grilling.** Matt Pocock's pair, tuned for my workflow. grill-me invokes grilling, which interviews you about a plan and maps its decisions as a design tree. It asks at most five questions per round, and the interview ends only when I say so.
 - **writing-for-agents.** Matt Pocock's skill for writing documents that agents read. Exceptionally effective. Its skill mechanics reference is adapted for Codex and Pi.
 - **unslop.** From Lauren Tan's pstack collection. It strips AI tells out of prose. No more annoying em dashes or stock contrast phrases. Sentences get said plainly.
 - **humanizer.** blader's skill, by Siqi Chen. It rewrites AI-sounding prose so it reads like a person wrote it. It lives here as a plain skill that both harnesses read.
-- **readme-update.** Mine. It keeps a project's README in step with its skills and agents under `.agents/`, `.codex/`, and `.pi/`. It checks borrowed skills' licenses at the source, credits the authors, and runs new prose through unslop then humanizer.
+- **readme-update.** Mine. It keeps a project's README in step with its skills and agents under `.agents/`, `.codex/`, and `.pi/`. It verifies new or changed credit claims at the source and edits changed prose through unslop then humanizer in the same agent.
 - **tui-design.** gfargo's skill. It teaches terminal layout, spacing, colour restraint, visual hierarchy, resize and error handling. I use its design guidance for Pi's terminal interfaces.
 - **systematic-debugging.** Jesse Vincent's skill, from his superpowers collection. It makes you find the root cause before touching a fix. This is my guard against the monkey-patching that sank my last attempt. Its reference files are included; the workflow uses the checks available in the current harness.
 - **thermo-nuclear-review** and **thermo-nuclear-code-quality-review.** Cursor's pair. The first audits a branch's diff for bugs, breaking changes, security holes and feature-gate leaks. The second is a harsh maintainability review that hunts over-engineering and spaghetti. I run one reviewer subagent per skill, each with its own context.
@@ -75,29 +75,15 @@ flowchart TD
 
 Scout's essential instructions live directly in its agent file. Reading instructions does not guarantee compliance, so the main agent checks the returned evidence and asks focused follow-up questions when support is missing.
 
-## How the reviewers work
+## How delivery works
 
-Each reviewer reads its assigned skill and reviews committed changes from the common ancestor of `main` and the current branch to the branch tip. Uncommitted working files are outside that comparison. The reviewer names the changed files, then returns the skill's report under its own heading, preserving its priority terms, ordering, and approval bar where defined.
+[AGENTS.md](AGENTS.md) owns the delivery sequence, review limits and user approval boundaries. Specs describe the product and its acceptance criteria. Skills supply methods; they do not add review rounds.
 
-For a full review, the main agent runs both reviewers. They report advice and do not apply fixes. Fixes go through systematic-debugging and the applicable checks. I review the result before committing, separately approve publishing the branch and opening a PR, and handle the merge myself.
+The implementer checks and commits a coherent candidate. Each reviewer gets one initial pass. After fixes, an affected reviewer gets its original report and correction diff for one verification callback. CodeRabbit handles the remote review stage without automatically restarting local reviewers. I approve user-visible changes and handle the merge.
 
-```mermaid
-flowchart TD
-    A[Main agent requests full branch review] --> B[reviewer-general: Sol high]
-    A --> C[reviewer-code-quality: Luna max]
-    B --> D[Name changed files and run thermo-nuclear-review]
-    C --> E[Name changed files and run thermo-nuclear-code-quality-review]
-    D --> F[Return the assigned skill report]
-    E --> F
-    F --> G[Main agent assesses findings]
-    G --> H[Resolve real issues and run applicable checks]
-    H --> I[I review and approve the commit]
-    I --> J[I approve push and PR creation]
-    J --> K[Checks and CodeRabbit review the PR]
-    K --> L[Read every inline finding and resolve real issues]
-    L --> M[I merge and delete the remote branch]
-    M --> N[Pull main, delete local branch, and prune]
-```
+The reviewer definitions distinguish initial review from finding verification. They inspect the supplied revisions and any explicitly included uncommitted files, report evidence and leave changes to the implementer. A supported finding matters; another possible design is not automatically a reason to rewrite working code.
+
+Before a new slice starts, its plan identifies uncertain mechanisms, the permitted agents and the first observable result. Unexpected infrastructure work returns to a scope checkpoint rather than silently becoming the project.
 
 ## Credits
 
