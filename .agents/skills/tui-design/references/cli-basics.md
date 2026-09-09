@@ -35,7 +35,7 @@ The bar for a CLI to feel professional is lower than a TUI, but the principles a
 
 **Robust and empathetic** — validate input early, fail fast, never lie about state.
 
-**Always use a real argument-parsing library** (Cobra, urfave/cli, Click, Typer, argparse, clap, oclif, picocli, swift-argument-parser). Hand-rolled parsers always get edge cases wrong.
+Use the existing parser or the language's standard argument parser first. Add a parsing dependency only when the current command contract needs features those options cannot provide. Validate unsupported and ambiguous arguments explicitly.
 
 ---
 

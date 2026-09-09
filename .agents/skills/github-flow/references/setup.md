@@ -2,7 +2,7 @@
 
 An existing folder becomes a repo in place. Nothing moves, nothing is copied, no new folder appears.
 
-The instructor stance from `SKILL.md` holds throughout, and this branch contains the session's only true one-way door: the first publish.
+Use the delegated or learning mode selected in `SKILL.md`. Inspect the repository before first publication; public history may retain files after they are removed from the current branch.
 
 ## Order matters
 
@@ -20,7 +20,7 @@ The instructor stance from `SKILL.md` holds throughout, and this branch contains
 
 ## Writing the .gitignore
 
-Ask what the folder holds before writing it. The things that must never go up:
+Inspect what the folder holds before writing it. Ask only about unresolved ownership or publication scope. The things that must never go up:
 
 - **Credentials** — `auth.json`, `.env`, anything with a token or key
 - **Session logs and transcripts** — private conversation data

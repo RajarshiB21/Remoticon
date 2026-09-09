@@ -33,15 +33,14 @@ Sort every situation into one of two piles before touching anything, and tell th
 git checkout -b <right-branch>
 ```
 
-**Committed to main by mistake, not pushed.** Move the commit to a branch, then rewind main:
+**Committed to main by mistake, not pushed.** Inspect status, remote history and worktrees first. Preserve all uncommitted work and identify the exact pre-change commit. Once the working tree is clean and the intended correction is authorized, keep the commit on a new branch and move the unoccupied local main pointer back:
 
 ```
-git branch <new-branch>          points at the current commit
-git reset --hard origin/main     rewinds main to match GitHub
-git checkout <new-branch>        the work is here
+git switch -c <new-branch>
+git branch -f main <verified-pre-change-commit>
 ```
 
-Explain `--hard` before they type it: it discards uncommitted changes. It is safe here *because* the work was committed a line earlier. That "because" is the lesson.
+Verify both branch pointers afterward. Do not assume origin/main is current or discard unrelated working changes. If main is checked out elsewhere or the commit was published, stop this recipe and establish the appropriate recovery from that evidence.
 
 **Want to undo the last commit but keep the changes.**
 
@@ -68,9 +67,9 @@ git add <file>
 git commit
 ```
 
-For a solo learner this is nearly always caused by editing on GitHub and locally at the same time — worth naming, because avoiding it beats resolving it.
+Inspect the conflicting commits to explain the actual cause; do not assume where the edits came from.
 
-**"I don't know what I did."** `git reflog` lists every position HEAD has held, including states no branch points at any more. Almost nothing committed is truly lost for about 30 days. Say that first — it changes the conversation from panic to lookup.
+**"I don't know what I did."** Inspect `git reflog` for recorded earlier HEAD positions, including commits no branch currently references. Recovery depends on retained reflog entries and objects; do not promise a fixed retention window or recoverability of uncommitted files.
 
 ## After any recovery
 

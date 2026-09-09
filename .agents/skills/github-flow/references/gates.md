@@ -1,73 +1,29 @@
-# Gates: checks, branch protection, review bots
+# Checks, branch protection and review bots
 
-A **gate** is something that stands between a branch and main. Three exist, they stack, and they are worth understanding as one idea before wiring any of them up.
+Use this reference when configuring a repository's checks. The parent skill determines delegated versus learning mode; workspace AGENTS.md determines publication and merge authority.
 
-## What a check is
+## Continuous integration
 
-A **check** is any automated thing that reports pass or fail on a pull request. It appears in one place — a strip on the PR page saying "All checks have passed" or "Some checks haven't completed yet" — no matter what produced it.
+CI runs the repository's configured commands on a runner. A green result proves those commands passed for that revision and environment. It does not prove that the assertions are sufficient: both tests and workflow files can change in a PR.
 
-The teaching point, and the reason any of this is worth setting up: **a check is a receipt the agent did not write.** An agent can tell the user the tests passed. A green tick on the PR page was produced by a machine outside the project, running only what was committed, and cannot be edited from inside the repo. For a user who has been burned by an agent editing tests to make them pass, this is the whole value — say it in those terms.
+Inspect the actual workflow, runner, dependency lockfile and required check names. Reuse existing commands and supported versions rather than copying a generic setup. Local checks catch failures before push; CI also detects missing committed files and environment differences.
 
-## GitHub Actions
-
-A rented, empty Linux machine that runs commands listed in a file in the repo. It is not a testing tool; it runs whatever is written down.
-
-```
-.github/workflows/ci.yml
-```
-
-Two properties decide everything about how it is used: **it has no screen, and it has no money.** So it can never look at pixels, and it must never make a paid API call. Anything visual, and anything that costs, stays on the user's machine and never gates a merge.
-
-A minimal workflow for a Node/TypeScript project:
-
-```yaml
-name: CI
-on: [push, pull_request]
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm ci
-      - run: npm run check
-```
-
-Two things to explain when it first runs:
-
-- **`npm ci` not `npm install`** — installs exactly what the lockfile says, so the run is reproducible.
-- **Why the same commands run twice.** The user already ran them locally. Actions runs them on a machine holding *only what was committed*. That is the point: a forgotten file passes locally, because the file is sitting on their disk, and fails here. Same for a stale build or an environment variable only they have. Local cannot catch these by definition — local is where the contamination lives.
-
-Free without limit on public repos, standard runners. On private repos the Free plan includes 2,000 minutes a month.
+Keep provider secrets out of deterministic test jobs. CI can make network calls or incur charges if configured to do so; absence of paid calls is a project policy, not a property of CI. Verify current runner billing before adding paid resources. Native user acceptance remains separate from automated checks.
 
 ## Branch protection
 
-The switch that turns a written workflow into a rule. Settings → Branches → Add rule on `main`:
+Inspect current protection or rulesets and any bypass permissions. Configure a required PR and the actual required check names only within the user's authorization. A green optional check alone does not enforce anything.
 
-- **Require a pull request before merging** — no more pushing straight to main
-- **Require status checks to pass** — then pick the checks by name (they only appear in the list after they have run at least once, so open one PR first)
-
-Before this, "don't merge until it's green" is a promise. After it, the Merge button is disabled until it is green. Frame it that way — it is the difference between a rule and a locked door, and it is one checkbox.
+Verify the effective rule after changing it. A branch rule is not proof that administrators or other bypass actors cannot merge. Preserve the user-only merge boundary in this workspace.
 
 ## Review bots
 
-A bot that reads the diff and leaves inline comments on the PR, as a colleague would. CodeRabbit, Greptile, Copilot review and Qodo all do this; most have a free tier for public repos. Connected once on the bot's own website, then it comments on every PR by itself — nothing is installed locally.
+A review bot reports findings about code. Read its complete report and inline comments, and verify whether its status represents a completed review, a skip, a failure or a pending run on the current revision.
 
-Three things to be clear about when one is set up:
+Availability, automatic triggers and included usage depend on the integration and account. Verify them when setting up the bot; do not promise that every PR is automatically reviewed.
 
-- **It registers as a check**, so it holds the merge button while it thinks. That surprises people the first time.
-- **It reads code, not pixels.** It cannot say whether something looks right. Anything visual is still the user's eyes.
-- **Its comments are advice, not tasks.** Acting on all of them is a choice, not an obligation — and auto-fixing every nitpick is how a project drowns in churn.
+Findings require engineering assessment. Apply the workspace's defect/suggestion distinction, disposition every finding, and respect the bounded local review lifecycle. Code review does not establish native appearance or responsiveness.
 
-## The order to add them
+## Setup order
 
-Each one is only useful once the one before it exists.
-
-1. **A PR** — nothing to gate without one.
-2. **Actions** — something for the gate to read.
-3. **Branch protection** — pointing at a check that has already run once.
-4. **A review bot** — optional, and last.
-
-Adding branch protection before any check exists produces a rule that blocks everything and points at nothing.
+Inspect the repository and existing PR/check state, establish the workflow, verify one actual run, then configure required checks and any authorized review integration. Do not replace working infrastructure merely to match this example sequence.
